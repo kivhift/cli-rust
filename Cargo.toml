@@ -1,0 +1,8 @@
+[workspace]
+resolver = "2"
+
+members = [
+    "r-cat",
+    "r-head",
+    "r-wc",
+]
