@@ -1,7 +1,7 @@
 use std::{
     error::Error,
     fs::File,
-    io::{self, BufRead, BufReader, Read},
+    io::{self, BufRead, BufReader, Read, Write},
 };
 
 use clap::Parser;
@@ -62,8 +62,10 @@ pub fn run(cfg: Config) -> HeadResult<()> {
                 }
 
                 if want_bytes {
+                    let mut stdout = io::stdout().lock();
+
                     reader.take(cfg.bytes as u64).read_to_end(&mut bytes)?;
-                    print!("{}", String::from_utf8_lossy(bytes.as_slice()));
+                    stdout.write_all(bytes.as_slice())?;
                     bytes.clear();
                 } else if want_lines {
                     for _ in 0..cfg.lines {
