@@ -1,0 +1,25 @@
+==> inputs/empty.txt <==
+
+==> inputs/one.txt <==
+Öne line, four words.
+
+==> inputs/two.txt <==
+Two lines.
+Four words.
+
+==> inputs/three.txt <==
+Three
+lines,
+four words.
+
+==> inputs/ten.txt <==
+one
+two
+three
+four
+
+==> inputs/UTF-8-demo.txt <==
+
+UTF-8 encoded sample plain-text file
+‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾
+
