@@ -9,8 +9,17 @@ declare -r IN=inputs OUT=expected
 
 [ -d $OUT ] || mkdir $OUT
 
+declare -r files=(
+    empty.txt
+    one.txt
+    two.txt
+    three.txt
+    ten.txt
+    UTF-8-demo.txt
+)
+
 declare all= file= outf= i=
-for file in empty.txt one.txt two.txt three.txt ten.txt UTF-8-demo.txt; do
+for file in ${files[*]}; do
     outf=$OUT/$file.out
     file=$IN/$file
     all+=" $file"
