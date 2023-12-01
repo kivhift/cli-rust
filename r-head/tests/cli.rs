@@ -1,10 +1,7 @@
-use std::error::Error;
 use std::path::PathBuf;
 
 use assert_cmd::Command;
 use predicates::prelude::*;
-
-type TestResult = Result<(), Box<dyn Error>>;
 
 const PROG: &str = "r-head";
 const INPUT_DIR: &str = "tests/inputs";
@@ -18,79 +15,69 @@ const TEST_INPUTS: &[&str] = &[
     "ten.txt",
 ];
 
-fn run(base: &str, args: &[&str]) -> TestResult {
+fn run(base: &str, args: &[&str]) {
     let input_path = PathBuf::from(INPUT_DIR).join(base);
     let expected_path = PathBuf::from(EXPECTED_DIR)
         .join([base, ".out", &args.join("")].join(""));
 
-    Command::cargo_bin(PROG)?
+    Command::cargo_bin(PROG).unwrap()
         .arg(input_path)
         .args(args)
         .assert()
         .success()
         .stdout(predicate::path::eq_file(expected_path));
-
-    Ok(())
 }
 
-fn run_stdin(base: &str, args: &[&str]) -> TestResult {
+fn run_stdin(base: &str, args: &[&str]) {
     let input_path = PathBuf::from(INPUT_DIR).join(base);
     let expected_path = PathBuf::from(EXPECTED_DIR)
         .join([base, ".out", &args.join("")].join(""));
 
-    Command::cargo_bin(PROG)?
-        .pipe_stdin(input_path)?
+    Command::cargo_bin(PROG).unwrap()
+        .pipe_stdin(input_path).unwrap()
         .args(args)
         .assert()
         .success()
         .stdout(predicate::path::eq_file(expected_path));
-
-    Ok(())
 }
 
 #[test]
-fn arg_input() -> TestResult {
+fn arg_input() {
     for input in TEST_INPUTS {
-        let _ = run(input, &[])?;
-        let _ = run(input, &["-c1"])?;
+        let _ = run(input, &[]);
+        let _ = run(input, &["-c1"]);
         for i in &[2, 4] {
-            let _ = run(input, &[&format!("-c{}", i)])?;
-            let _ = run(input, &[&format!("-n{}", i)])?;
+            let _ = run(input, &[&format!("-c{}", i)]);
+            let _ = run(input, &[&format!("-n{}", i)]);
         }
     }
-
-    Ok(())
 }
 
 #[test]
-fn stdin_input() -> TestResult {
+fn stdin_input() {
     for input in TEST_INPUTS {
-        let _ = run_stdin(input, &[])?;
-        let _ = run_stdin(input, &["-c1"])?;
+        let _ = run_stdin(input, &[]);
+        let _ = run_stdin(input, &["-c1"]);
         for i in &[2, 4] {
-            let _ = run_stdin(input, &[&format!("-c{}", i)])?;
-            let _ = run_stdin(input, &[&format!("-n{}", i)])?;
+            let _ = run_stdin(input, &[&format!("-c{}", i)]);
+            let _ = run_stdin(input, &[&format!("-n{}", i)]);
         }
     }
-
-    Ok(())
 }
 
 #[test]
-fn utf8_split() -> TestResult {
-    let _ = run(TEST_INPUTS[0], &["-c162"])?;
-
-    Ok(())
+fn utf8_split() {
+    let _ = run(TEST_INPUTS[0], &["-c162"]);
 }
 
 #[test]
-fn all_input() -> TestResult {
+fn all_input() {
     let mut inputs = vec![];
     for input in TEST_INPUTS {
         inputs.push(PathBuf::from(INPUT_DIR).join(input));
     }
 
-    Command::cargo_bin(PROG)?
+    Command::cargo_bin(PROG).unwrap()
         .args(&inputs)
         .assert()
         .success()
@@ -98,7 +85,7 @@ fn all_input() -> TestResult {
             PathBuf::from(EXPECTED_DIR).join("all.out")
         ));
 
-    Command::cargo_bin(PROG)?
+    Command::cargo_bin(PROG).unwrap()
         .args(&inputs)
         .arg("-c1")
         .assert()
@@ -111,7 +98,7 @@ fn all_input() -> TestResult {
         for a in &["c", "n"] {
             let arg = format!("-{}{}", a, i);
 
-            Command::cargo_bin(PROG)?
+            Command::cargo_bin(PROG).unwrap()
                 .args(&inputs)
                 .arg(&arg)
                 .assert()
@@ -121,6 +108,4 @@ fn all_input() -> TestResult {
                 ));
         }
     }
-
-    Ok(())
 }
