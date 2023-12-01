@@ -1,14 +1,13 @@
-==> inputs/empty.txt <==
-
-==> inputs/one.txt <==
-Öne
-==> inputs/two.txt <==
-Two 
-==> inputs/three.txt <==
-Thre
-==> inputs/ten.txt <==
-one
-
-==> inputs/UTF-8-demo.txt <==
+==> tests/inputs/UTF-8-demo.txt <==
 
 UTF
+==> tests/inputs/empty.txt <==
+
+==> tests/inputs/one.txt <==
+Öne
+==> tests/inputs/two.txt <==
+Two 
+==> tests/inputs/three.txt <==
+Thre
+==> tests/inputs/ten.txt <==
+one

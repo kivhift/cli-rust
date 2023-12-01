@@ -1,8 +1,8 @@
 use std::error::Error;
-use std::fs;
 use std::path::PathBuf;
 
-use snapbox::cmd::{Command, cargo_bin};
+use assert_cmd::Command;
+use predicates::prelude::*;
 
 type TestResult = Result<(), Box<dyn Error>>;
 
@@ -10,12 +10,12 @@ const PROG: &str = "r-head";
 const INPUT_DIR: &str = "tests/inputs";
 const EXPECTED_DIR: &str = "tests/expected";
 const TEST_INPUTS: &[&str] = &[
+    "UTF-8-demo.txt",
     "empty.txt",
     "one.txt",
     "two.txt",
     "three.txt",
     "ten.txt",
-    "UTF-8-demo.txt",
 ];
 
 fn run(base: &str, args: &[&str]) -> TestResult {
@@ -23,12 +23,12 @@ fn run(base: &str, args: &[&str]) -> TestResult {
     let expected_path = PathBuf::from(EXPECTED_DIR)
         .join([base, ".out", &args.join("")].join(""));
 
-    Command::new(cargo_bin(PROG))
+    Command::cargo_bin(PROG)?
         .arg(input_path)
         .args(args)
         .assert()
         .success()
-        .stdout_eq_path(expected_path);
+        .stdout(predicate::path::eq_file(expected_path));
 
     Ok(())
 }
@@ -37,14 +37,13 @@ fn run_stdin(base: &str, args: &[&str]) -> TestResult {
     let input_path = PathBuf::from(INPUT_DIR).join(base);
     let expected_path = PathBuf::from(EXPECTED_DIR)
         .join([base, ".out", &args.join("")].join(""));
-    let input_stdin = fs::read_to_string(input_path)?;
 
-    Command::new(cargo_bin(PROG))
+    Command::cargo_bin(PROG)?
+        .pipe_stdin(input_path)?
         .args(args)
-        .stdin(input_stdin)
         .assert()
         .success()
-        .stdout_eq_path(expected_path);
+        .stdout(predicate::path::eq_file(expected_path));
 
     Ok(())
 }
@@ -79,7 +78,49 @@ fn stdin_input() -> TestResult {
 
 #[test]
 fn utf8_split() -> TestResult {
-    let _ = run(TEST_INPUTS[TEST_INPUTS.len() - 1], &["-c162"])?;
+    let _ = run(TEST_INPUTS[0], &["-c162"])?;
+
+    Ok(())
+}
+
+#[test]
+fn all_input() -> TestResult {
+    let mut inputs = vec![];
+    for input in TEST_INPUTS {
+        inputs.push(PathBuf::from(INPUT_DIR).join(input));
+    }
+
+    Command::cargo_bin(PROG)?
+        .args(&inputs)
+        .assert()
+        .success()
+        .stdout(predicate::path::eq_file(
+            PathBuf::from(EXPECTED_DIR).join("all.out")
+        ));
+
+    Command::cargo_bin(PROG)?
+        .args(&inputs)
+        .arg("-c1")
+        .assert()
+        .success()
+        .stdout(predicate::path::eq_file(
+            PathBuf::from(EXPECTED_DIR).join("all.out-c1")
+        ));
+
+    for i in &[2, 4] {
+        for a in &["c", "n"] {
+            let arg = format!("-{}{}", a, i);
+
+            Command::cargo_bin(PROG)?
+                .args(&inputs)
+                .arg(&arg)
+                .assert()
+                .success()
+                .stdout(predicate::path::eq_file(
+                    PathBuf::from(EXPECTED_DIR).join(format!("all.out{}", arg))
+                ));
+        }
+    }
 
     Ok(())
 }

@@ -3,19 +3,19 @@
 set -eu -o pipefail
 
 # Make things easier by being able to work relative to containing directory.
-cd ${0%/*}
+cd ${0%/*}/..
 
-declare -r IN=inputs OUT=expected
+declare -r IN=tests/inputs OUT=tests/expected
 
 [ -d $OUT ] || mkdir $OUT
 
 declare -r files=(
+    UTF-8-demo.txt
     empty.txt
     one.txt
     two.txt
     three.txt
     ten.txt
-    UTF-8-demo.txt
 )
 
 declare all= file= outf= i=

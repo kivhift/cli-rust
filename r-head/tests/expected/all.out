@@ -1,30 +1,4 @@
-==> inputs/empty.txt <==
-
-==> inputs/one.txt <==
-Öne line, four words.
-
-==> inputs/two.txt <==
-Two lines.
-Four words.
-
-==> inputs/three.txt <==
-Three
-lines,
-four words.
-
-==> inputs/ten.txt <==
-one
-two
-three
-four
-five
-six
-seven
-eight
-nine
-ten
-
-==> inputs/UTF-8-demo.txt <==
+==> tests/inputs/UTF-8-demo.txt <==
 
 UTF-8 encoded sample plain-text file
 ‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾
@@ -35,3 +9,29 @@ Markus Kuhn [ˈmaʳkʊs kuːn] <http://www.cl.cam.ac.uk/~mgk25/> — 2002-07-25
 The ASCII compatible UTF-8 encoding used in this plain-text file
 is defined in Unicode, ISO 10646-1, and RFC 2279.
 
+
+==> tests/inputs/empty.txt <==
+
+==> tests/inputs/one.txt <==
+Öne line, four words.
+
+==> tests/inputs/two.txt <==
+Two lines.
+Four words.
+
+==> tests/inputs/three.txt <==
+Three
+lines,
+four words.
+
+==> tests/inputs/ten.txt <==
+one
+two
+three
+four
+five
+six
+seven
+eight
+nine
+ten
