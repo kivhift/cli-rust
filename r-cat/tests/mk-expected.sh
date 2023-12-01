@@ -9,18 +9,26 @@ declare -r IN=inputs OUT=expected
 
 [ -d $OUT ] || mkdir $OUT
 
-declare all= file= outf=
-for file in $IN/*; do
+declare -r files=(
+    UTF-8-demo.txt
+    empty.txt
+    fox.txt
+    spiders.txt
+    the-bustle.txt
+)
+
+declare all= file= outf= a=
+for file in ${files[*]}; do
+    outf=$OUT/$file.out
+    file=$IN/$file
     all+=" $file"
-    outf=$OUT/${file##*/}
-    cat $file > $outf.out
-    cat -n $file > $outf.n.out
-    cat -b $file > $outf.b.out
-    cat < $file > $outf.stdin.out
-    cat -n < $file > $outf.n.stdin.out
-    cat -b < $file > $outf.b.stdin.out
+
+    for a in '' -b -n; do
+        cat $a $file > $outf$a
+        cat $a < $file > $outf.stdin$a
+    done
 done
 
-cat $all > $OUT/all.out
-cat -n $all > $OUT/all.n.out
-cat -b $all > $OUT/all.b.out
+for a in '' -b -n; do
+    cat $a $all > $OUT/all.out$a
+done
