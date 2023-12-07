@@ -1,6 +1,6 @@
 use std::{
     error::Error,
-    fs::File,
+    fs::{metadata, File},
     io::{self, BufRead, BufReader},
 };
 
@@ -12,7 +12,7 @@ type WcResult<T> = Result<T, Box<dyn Error>>;
 #[derive(Parser)]
 #[clap(version, about = "Rusty wc")]
 pub struct Config {
-    #[arg(default_value = "-", help = "Input file(s)")]
+    #[arg(help = "Input file(s)")]
     files: Vec<String>,
     #[arg(short, long, help = "Print newline count(s)")]
     lines: bool,
@@ -108,42 +108,69 @@ pub fn get_args() -> WcResult<Config> {
         cfg.bytes = true;
     }
 
+    if cfg.files.is_empty() {
+        cfg.files.push("".into());
+    }
+
     Ok(cfg)
 }
 
 fn open(path: &str) -> WcResult<Box<dyn BufRead>> {
     match path {
-        "-" => Ok(Box::new(io::stdin().lock())),
+        "" | "-" => Ok(Box::new(io::stdin().lock())),
         _ => Ok(Box::new(BufReader::new(File::open(path)?))),
     }
 }
 
 pub fn run(cfg: Config) -> WcResult<()> {
-    let mut total = Counts::new();
+    // To determine the width of the output fields, stat all of the files to
+    // determine the total byte count and then take the total's base-10 log.
+    let mut total = 0;
+    let mut stdin = false;
+    for path in &cfg.files {
+        if "" == path || "-" == path {
+            stdin = true;
+        }
+        if let Ok(meta) = metadata(&path) {
+            total += meta.len();
+        }
+    }
+
+    let width = if stdin {
+        7
+    } else if let Some(log10) = total.checked_ilog10() {
+        log10 + 1
+    } else {
+        1
+    } as usize;
+
     let fmt = |cnt: Counts, name: &str| {
         let mut parts = Vec::with_capacity(5);
 
         if cfg.lines {
-            parts.push(format!("{:>8}", cnt.lines));
+            parts.push(format!("{:>width$}", cnt.lines));
         }
         if cfg.words {
-            parts.push(format!("{:>8}", cnt.words));
+            parts.push(format!("{:>width$}", cnt.words));
         }
         if cfg.chars {
-            parts.push(format!("{:>8}", cnt.chars));
+            parts.push(format!("{:>width$}", cnt.chars));
         }
         if cfg.bytes {
-            parts.push(format!("{:>8}", cnt.bytes));
+            parts.push(format!("{:>width$}", cnt.bytes));
         }
 
-        parts.push(name.to_string());
+        if !name.is_empty() {
+            parts.push(name.to_string());
+        }
 
         parts.join(" ")
     };
 
+    let mut total = Counts::new();
     for path in &cfg.files {
         match open(&path) {
-            Err(err) => eprintln!("wc: Failed to open {}: {}", path, err),
+            Err(err) => eprintln!("wc: {}: {}", path, err),
             Ok(reader) => {
                 if let Ok(counts) = count(reader) {
                     total.accumulate(&counts);
